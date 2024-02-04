@@ -2,12 +2,16 @@
 aws_account_owner = "acutchin-bitpusher"
 #aws_account_name  = "prod"
 #aws_account_class = "lab"
-aws_account_id    = "884539147300"
-aws_region        = "us-west-2"
+aws_account_id = "884539147300"
+aws_region     = "us-west-2"
 
 ##  ENVIRONMENT
 env_name = "act2"
 git_repo = "canela-infrapoc-env-sandbox"
+
+##  RESOURCE NAMING
+resource_name_prefix = "canela-acutchinlab"
+prefix               = "canela-acutchinlab"
 
 ###  USERSVC
 #usersvc_enable            = true

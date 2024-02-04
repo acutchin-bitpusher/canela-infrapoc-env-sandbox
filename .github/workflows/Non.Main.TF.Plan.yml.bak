@@ -6,26 +6,47 @@ on:
       - '!main'
 env:
   AWS_REGION: "us-west-2"
-  IAM_ROLE_TO_ASSUME: "arn:aws:iam::884539147300:role/gha_self_service_all"
-  ROLE_SESSION_NAME: "${{ github.repository }}_${{ github.run_id }}"
+  IAM_ROLE_TO_ASSUME: "arn:aws:iam::<account_id>:role/<role_name>"
+  #ROLE_SESSION_NAME: "${{ github.repository }}.${{ github.run_id }}" ##  TOO LONG; ROLE SESSION NAME CAN BE MAX 64 CHARS :(
+  ROLE_SESSION_NAME: "GHA.run.id.${{ github.run_id }}"
 permissions:
   id-token: write
   contents: read
 jobs:
-  TerraformApply
+  TerraformPlan:
     runs-on: ubuntu-latest
     steps:
+      ##  CLONE REPO (https://github.com/actions/checkout)
       - name: Clone Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
+      ##  CONFIGURE AWS CREDENTIALS (https://github.com/aws-actions/configure-aws-credentials)
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4.0.1
         with:
           role-to-assume: ${{ env.IAM_ROLE_TO_ASSUME }}
           role-session-name: ${{ env.ROLE_SESSION_NAME }}
           aws-region: ${{ env.AWS_REGION }}
+      ##  SHOW AWS STS CALLER IDENTITY (JUST FOR TROUBLESHOOTING)
+      - name: STSGetCallerIdentity
+        run: |
+          aws sts get-caller-identity
+      ##  SET UP TERRAFORM (https://github.com/hashicorp/setup-terraform)
+      - name: SetupTerraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.5.5"
+      ##  TERRAFORM INIT
       - name: Terraform Init
         run: |
           terraform init -backend-config=backend.config
+      ##  TO DO: ADD LINTING HERE FOR VARIABLES, SECURITY, ETC
+      ##  TERRAFORM VALIDATE
+      - name: Terraform Validate
+        run: |
+          terraform validate
+      ##  TERRAFORM PLAN
       - name: Terraform Plan
         run: |
           terraform plan
+
+
